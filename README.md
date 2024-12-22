@@ -1,4 +1,4 @@
-https://github.com/user-attachments/assets/81d3954f-4e75-424c-95e1-bc2bde7e705b
+![Запись экрана](https://github.com/user-attachments/assets/81d3954f-4e75-424c-95e1-bc2bde7e705b)
 
 ## Task_2
 
