@@ -1,101 +1,87 @@
-import Image from "next/image";
+"use client"
+import GifGrid from "./ui/gif-grid";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [inputQuery, setInputQuery] = useState(''); // введенный текст из тэга input
+  const [gifQuery, setGifQuery] = useState(''); // значение передаваемое в GifGrid
+  const [messages, setMessages] = useState<{ text: string | React.ReactNode; time: string }[]>([]); // сообщения из message box
+  const [isGifChoosing, setGifChoosing] = useState(false); // флаг для проверки на активное окно: message box или gif grid
+  
+  useEffect(() => { 
+    if (inputQuery.startsWith("/gif")) { // проверка при каждом изменении введеного текста inputQuery 
+      setGifChoosing(true);
+      setGifQuery(inputQuery.slice(5).trim()); // с 5-го символа чтобы нельзя было обрабатывать запросы типа /gifcat
+    } else {
+      setGifChoosing(false);
+    }
+  }, [inputQuery]); 
+  
+  const onInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => { // запоминаем введенное значение inputQuery
+    setInputQuery(e.target.value);
+  }
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => { // нажатием enter при фокусе на input отправляем сообщение 
+    if (e.key === 'Enter' && inputQuery.trim() !== '') {
+      const newMessage = {
+        text: inputQuery.trim(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+
+      setMessages([...messages, newMessage]);
+      setInputQuery('');
+    }
+  };
+  
+  const onGifClick = (gifUrl: string) => { // обработка события клика по gif из gif grid
+    const newMessage = {
+      text: <img src={gifUrl} alt="gif" className="h-[220px] w-auto object-contain rounded-[6px]" />, // высота gif взята из figma, ширину масштабируем под нее
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages([...messages, newMessage]);
+    setInputQuery('');
+  };
+
+  return (
+    <div className="flex flex-col justify-center items-end bg-white w-[437px] h-[340px] rounded-[4px]">
+      <div>
+      {isGifChoosing ? // проверка какой div отображать - gif grid или message box
+      (
+        <div className="h-[248px] w-[404px] mt-[22px] mx-auto mb-2 flex justify-center items-center 
+        rounded-1px border-gray-300 border-1 overflow-y-scroll scrollbar-thumb-[#dae2ea]">
+          <div className="h-full w-full flex justify-center pl-[10px] pr-[20px] mt-4">
+            <GifGrid query={gifQuery} onGifSelect={onGifClick} />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ):(
+        <div className="h-[248px] w-[404px] mt-[22px] mx-auto mb-2 flex flex-col space-y-2 justify-end overflow-auto">
+        {messages.map((message, index) => (
+            <div
+              key={index}
+              className=" bg-white space-x-2 rounded-[6px]  w-auto whitespace-normal flex items-end">
+              <span className="text-[#828282]">{message.text}</span>
+              <span className="text-[#99a2ad] text-[13px] leading-[17px]">{message.time}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="relative w-[437px] h-[62px] bg-[#fafbfc] flex justify-center items-center border-[#dce1e5] border-t-1 
+      border-solid rounded-b-[4px] flex-shrink-0 py-[13px] px-[16px]">
+        <input className=" last:bg-white rounded-[6px] text-black placeholder-[#828282] border-[#d3d9d3] border-1 
+        border-solid focus:ring-1 font-roboto text-[13px]  focus:ring-gray-400 focus:outline-none w-full h-[36px] pl-3 leading-[17px]" 
+        type="text" 
+        value={inputQuery}
+        onChange={onInputChange}
+        onKeyDown={onKeyDown}
+        placeholder="Напишите сообщение..."/>
+          {isGifChoosing && 
+          <div className="absolute font-roboto text-[13px] mr-[361px] 
+          font-bold bg-colored-gif text-transparent bg-clip-text"> 
+            <div className="">/gif</div> 
+          </div>}
+      </div>
+    </div>
     </div>
   );
 }
